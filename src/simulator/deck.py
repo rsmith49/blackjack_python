@@ -31,7 +31,7 @@ class Deck:
 
         # Put these here so PyCharm would stop yelling at me
         self.cards = None
-        self.card_index = None
+        self.card_index = 0
 
         self.shuffle()
 
@@ -41,9 +41,7 @@ class Deck:
         :return:
         """
         self.card_index = 0
-        self.cards = [
-            val for val in CARD_VALUES
-        ] * self.num_decks
+        self.cards = CARD_VALUES * self.num_decks
 
         np.random.shuffle(self.cards)
 

@@ -42,7 +42,7 @@ class Hand:
         if double:
             self.doubled = True
 
-        if self.value() > MAX_SCORE:
+        if self.value() > BUST_SCORE:
             raise BustException()
 
     def value(self):
@@ -76,13 +76,13 @@ class Hand:
         # Idk, maybe every speed up counts
         value = self.value()
 
-        if value > MAX_SCORE:
+        if value > BUST_SCORE:
             amount = -1
 
         elif self.blackjack:
             amount = BLACKJACK_PAYOUT
 
-        elif dealer_hand > MAX_SCORE or value > dealer_hand:
+        elif dealer_hand > BUST_SCORE or value > dealer_hand:
             amount = 1
 
         elif value == dealer_hand:
