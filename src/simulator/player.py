@@ -82,10 +82,10 @@ class Hand:
         elif self.blackjack:
             amount = BLACKJACK_PAYOUT
 
-        elif dealer_hand > BUST_SCORE or value > dealer_hand:
+        elif dealer_hand.value() > BUST_SCORE or value > dealer_hand.value():
             amount = 1
 
-        elif value == dealer_hand:
+        elif value == dealer_hand.value():
             # Push
             amount = 0
 
@@ -96,6 +96,9 @@ class Hand:
             amount *= 2
 
         return amount
+
+    def __repr__(self):
+        return str(self.cards)
 
 
 class PlayerAction(Enum):
@@ -117,6 +120,13 @@ class BasePlayerHand:
         self.bet = 0
         self.winnings = 0
 
+    def reset_hand(self):
+        """
+        Resets the player's hand
+        """
+        self.hands = []
+        self.curr_hand_ndx = 0
+
     def deal_card(self, card):
         """
         Deals a card to this player. Card is added to current hand. Creates a hand if the player doesn't
@@ -136,12 +146,7 @@ class BasePlayerHand:
         :return:
         """
         while self.curr_hand_ndx < len(self.hands):
-            self.perform_action(
-                self.get_action(
-                    self.hands[self.curr_hand_ndx]
-                ),
-                deck
-            )
+            self.perform_action(self.get_action(), deck)
 
     def get_player_state(self):
         """
@@ -149,13 +154,17 @@ class BasePlayerHand:
         """
         return self.hands
 
-    def get_action(self, hand):
+    def get_action(self):
         """
         Driven by the policy of the Player
-        :param hand: Hand that the player is on
-                     NOTE: This can be found easily with instance variables,
-                           but passing it as an argument will save time
         :return: PlayerAction enum value
+        """
+        raise NotImplementedError()
+
+    def update_state(self, game):
+        """
+        Update the state of the agent with the game state
+        :param game: The state of the game
         """
         raise NotImplementedError()
 
@@ -222,3 +231,11 @@ class BasePlayerHand:
                 deck.next_card()
             )
         )
+
+    def __repr__(self):
+        output = ""
+
+        for hand in self.hands:
+            output += f"VALUE: {hand.value()}, CARDS: {hand}"
+
+        return output

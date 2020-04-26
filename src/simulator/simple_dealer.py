@@ -12,12 +12,20 @@ class SimpleDealer(BasePlayerHand):
         """
         return self.hands[0].cards[1:]
 
-    def get_action(self, hand):
+    def get_action(self):
         """
         Implements action policy for this simple dealer. If the hand is lower than 17 then hit. If the hand is soft
         17 then hit. If the hand is equal to or above 17 then stay
         """
+        hand = self.hands[self.curr_hand_ndx]
+
         if hand.value() < 17 or hand.value() == 17 and hand.is_soft():
-            self.perform_action(PlayerAction.HIT)
+            return PlayerAction.HIT
         else:
-            self.perform_action(PlayerAction.STAY)
+            return PlayerAction.STAY
+
+    def update_state(self, game):
+        """
+        This simple dealer doesn't care about the game state to perform actions
+        """
+        pass
