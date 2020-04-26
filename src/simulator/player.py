@@ -82,10 +82,10 @@ class Hand:
         elif self.blackjack:
             amount = BLACKJACK_PAYOUT
 
-        elif dealer_hand > BUST_SCORE or value > dealer_hand:
+        elif dealer_hand.value() > BUST_SCORE or value > dealer_hand.value():
             amount = 1
 
-        elif value == dealer_hand:
+        elif value == dealer_hand.value():
             # Push
             amount = 0
 
@@ -96,6 +96,9 @@ class Hand:
             amount *= 2
 
         return amount
+
+    def __repr__(self):
+        return str(self.cards)
 
 
 class PlayerAction(Enum):
@@ -111,73 +114,98 @@ class BasePlayerHand:
     NOTE: dealer will also inherit from this
     """
 
-    def __init__(self, deck):
-        self.deck = deck
+    def __init__(self):
+        self.hands = []
+        self.curr_hand_ndx = 0
+        self.bet = 0
+        self.winnings = 0
 
-        hand = Hand(deck.next_card(), deck.next_card())
-        self.hands = [hand]
+    def reset_hand(self):
+        """
+        Resets the player's hand
+        """
+        self.hands = []
         self.curr_hand_ndx = 0
 
-    def play_hand(self):
+    def deal_card(self, card):
+        """
+        Deals a card to this player. Card is added to current hand. Creates a hand if the player doesn't
+        already have one
+        :param card: The card dealt to this player.
+        """
+        if not self.hands:
+            self.hands.append(Hand(card))
+        else:
+            hand = self.hands[self.curr_hand_ndx]
+            hand.add_card(card)
+
+    def play_hand(self, deck):
         """
         Performs actions for the hand based on the policy decided by
         self.get_action until the player busts or stays for each hand
         :return:
         """
         while self.curr_hand_ndx < len(self.hands):
-            self.perform_action(
-                self.get_action(
-                    self.hands[self.curr_hand_ndx]
-                )
-            )
+            self.perform_action(self.get_action(), deck)
 
-    def get_action(self, hand):
+    def get_player_state(self):
+        """
+        Gets the state of this player. Can be overridden to provide more/less state data
+        """
+        return self.hands
+
+    def get_action(self):
         """
         Driven by the policy of the Player
-        :param hand: Hand that the player is on
-                     NOTE: This can be found easily with instance variables,
-                           but passing it as an argument will save time
         :return: PlayerAction enum value
         """
         raise NotImplementedError()
 
-    def perform_action(self, action):
+    def update_state(self, game):
+        """
+        Update the state of the agent with the game state
+        :param game: The state of the game
+        """
+        raise NotImplementedError()
+
+    def perform_action(self, action, deck):
         """
         Performs the action specified by the enum
 
         NOTE: If needed for args, we can remove this middle man by having the
               self.get_action function just call self.hit etc. directly
         :param action: PlayerAction enum
+        :param deck: The deck object to pull cards from
         :return:
         """
         if action == PlayerAction.STAY:
             self._stay()
         elif action == PlayerAction.HIT:
-            self._hit()
+            self._hit(deck)
         elif action == PlayerAction.SPLIT:
-            self._split()
+            self._split(deck)
         elif action == PlayerAction.DOUBLE:
-            self._double()
+            self._double(deck)
 
     def _stay(self):
         self.curr_hand_ndx += 1
 
-    def _hit(self):
+    def _hit(self, deck):
         try:
             self.hands[self.curr_hand_ndx].add_card(
-                self.deck.next_card()
+                deck.next_card()
             )
         except BustException:
             self.curr_hand_ndx += 1
 
-    def _double(self):
+    def _double(self, deck):
 
         if len(self.hands[self.curr_hand_ndx].cards) > 2:
             raise ValueError("Can't double after the initial deal")
 
         try:
             self.hands[self.curr_hand_ndx].add_card(
-                self.deck.next_card(),
+                deck.next_card(),
                 double=True
             )
         except BustException:
@@ -186,7 +214,7 @@ class BasePlayerHand:
 
         self.curr_hand_ndx += 1
 
-    def _split(self):
+    def _split(self, deck):
         old_hand = self.hands[self.curr_hand_ndx]
         # Figured we may as well throw this validation here
         if len(old_hand.cards) != 2 or old_hand.cards[0] != old_hand.cards[1]:
@@ -194,12 +222,20 @@ class BasePlayerHand:
 
         self.hands[self.curr_hand_ndx] = Hand(
             old_hand.cards[0],
-            self.deck.next_card()
+            deck.next_card()
         )
         self.hands.insert(
             self.curr_hand_ndx + 1,
             Hand(
                 old_hand.cards[1],
-                self.deck.next_card()
+                deck.next_card()
             )
         )
+
+    def __repr__(self):
+        output = ""
+
+        for hand in self.hands:
+            output += f"VALUE: {hand.value()}, CARDS: {hand}"
+
+        return output
