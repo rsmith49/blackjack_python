@@ -5,12 +5,7 @@ player classes in order to create agents that rely on policy
 from enum import Enum
 
 from .consts import *
-
-
-class BustException(Exception):
-    """
-    Signals a player has busted (gone over 21)
-    """
+from .utils import BustException, BankruptException
 
 
 class Hand:
@@ -23,12 +18,7 @@ class Hand:
         """
         self.cards = list(cards)
         self.doubled = False
-
-        # If we got blackjack on the constructor, then it's blackjack
-        if self.value() == BLACKJACK:
-            self.blackjack = True
-        else:
-            self.blackjack = False
+        self.blackjack = False
 
     def add_card(self, card_val, double=False):
         """
@@ -42,8 +32,12 @@ class Hand:
         if double:
             self.doubled = True
 
-        if self.value() > BUST_SCORE:
+        value = self.value()
+
+        if value > BUST_SCORE:
             raise BustException()
+        elif len(self.cards) == 2 and value == BLACKJACK:
+            self.blackjack = True
 
     def value(self):
         """
@@ -108,17 +102,39 @@ class PlayerAction(Enum):
     DOUBLE = 3
 
 
-class BasePlayerHand:
+class PlayerHandAgent:
     """
-    Base player hand class to inherit from to enact policy decisions
-    NOTE: dealer will also inherit from this
+    Base player hand strategy class that should be inherited from to
+    enact policy decisions
+    NOTE: dealer strategy will also inherit from this
     """
-
     def __init__(self):
         self.hands = []
         self.curr_hand_ndx = 0
-        self.bet = 0
-        self.winnings = 0
+
+    # Methods to override in inheriting classes
+
+    def update_model(self, game):
+        """
+        Update the model of the agent from the game state
+        :param game: The state of the game
+        """
+        raise NotImplementedError()
+
+    def get_action(self):
+        """
+        Driven by the policy of the Player
+        :return: PlayerAction enum value
+        """
+        raise NotImplementedError()
+
+    def get_player_state(self):
+        """
+        Gets the state of this player. Can be overridden to provide more/less state data
+        """
+        return self.hands
+
+    # Methods to control game simulation logic - should be no need to override
 
     def reset_hand(self):
         """
@@ -146,29 +162,23 @@ class BasePlayerHand:
         :return:
         """
         while self.curr_hand_ndx < len(self.hands):
-            self.perform_action(self.get_action(), deck)
+            self._perform_action(self.get_action(), deck)
 
-    def get_player_state(self):
+    def amount_won(self, dealer_hand):
         """
-        Gets the state of this player. Can be overridden to provide more/less state data
+        Gets the multiplier for amount won from the bet for all hands
+        :param dealer_hand: PlayerHandAgent of the dealer
         """
-        return self.hands
+        amount_won = 0
+        for hand in self.hands:
+            amount_won += hand.amount_won(
+                # Assuming the dealer only has one hand
+                dealer_hand.hands[0]
+            )
 
-    def get_action(self):
-        """
-        Driven by the policy of the Player
-        :return: PlayerAction enum value
-        """
-        raise NotImplementedError()
+        return amount_won
 
-    def update_state(self, game):
-        """
-        Update the state of the agent with the game state
-        :param game: The state of the game
-        """
-        raise NotImplementedError()
-
-    def perform_action(self, action, deck):
+    def _perform_action(self, action, deck):
         """
         Performs the action specified by the enum
 
@@ -239,3 +249,127 @@ class BasePlayerHand:
             output += f"VALUE: {hand.value()}, CARDS: {hand}"
 
         return output
+
+
+# TODO: Maybe make the betting agent able to control amount to double/split
+class PlayerBettingAgent:
+    """
+    Basic player betting agent to inherit from to implement betting strategies
+    """
+    def __init__(self, buyin, can_lose=False):
+        """
+        :param buyin: The amount of money the player buys in with
+        :param can_lose: If the agent can lose (i.e. go bankrupt)
+        """
+        self.cash = buyin
+        self.can_lose = can_lose
+        self.curr_bet = None
+
+    # Methods to override in inheriting classes
+
+    def update_model(self, game):
+        """
+        Update the model of the agent from the game state
+        :param game: The state of the game
+        :return:
+        """
+        raise NotImplementedError()
+
+    def get_bet(self):
+        """
+        Return the bet to place based on the agent's policy
+        :return: A bet amount (float)
+        """
+        raise NotImplementedError()
+
+    # Methods to control game simulation logic - should be no need to override
+
+    def bet(self):
+        """
+        Sets the bet amount
+        (probably not super needed, but I was thinking for consistnecy of
+        just having the agents return an action, and not have to deal with
+        setting instance variables or anything)
+        """
+        self.curr_bet = self.get_bet()
+
+    def collect_winnings(self, multiplier):
+        """
+        Set the cash to the correct amount based on the bet's outcome
+        :param multiplier: A multiplier of the initial bet to add to self.cash
+        """
+        self.cash += multiplier * self.curr_bet
+
+        if self.can_lose and self.cash < 0:
+            raise BankruptException()
+
+
+class Player:
+    """
+    A player wrapper that takes a hand strategy and betting agent to perform
+    actions as a player
+    """
+    def __init__(
+            self,
+            player_hand_agent: PlayerHandAgent,
+            betting_agent: PlayerBettingAgent
+    ):
+        """
+        :param player_hand_agent: A PlayerHandAgent that implements policy for
+                                  each hand (i.e. hitting, doubling, etc.)
+        :param betting_agent: A PlayerBettingAgent that implements betting
+                              strategy for each hand
+        """
+        self.playing_agent = player_hand_agent
+        self.betting_agent = betting_agent
+
+    def update_model(self, game):
+        """
+        Wrapper that updates the "model" of the environment for the agents
+        :param game: A Game object containing the state of the game
+        """
+        # NOTE: Currently unused by the BaseGame
+        self.playing_agent.update_model(game)
+        self.betting_agent.update_model(game)
+
+    def place_bet(self):
+        """
+        Wrapper to set the bet for the hand
+        """
+        self.betting_agent.bet()
+
+    def reset_hand(self):
+        """
+        Wrapper to reset playing_agent's hand
+        """
+        self.playing_agent.reset_hand()
+
+    def play_hand(self, deck):
+        """
+        Wrapper to play the hand(s) in the current round
+        :param deck:
+        """
+        self.playing_agent.play_hand(deck)
+
+    def deal_card(self, card):
+        """
+        Wrapper to deal a card to the player hand agent
+        :param card: Card to deal
+        """
+        self.playing_agent.deal_card(card)
+
+    def collect_winnings(self, dealer_hand):
+        """
+        Updates the cash in self.betting_agent appropriately based on the
+        bet and the outcome of the hand
+        :param dealer_hand: Hand that the dealer ended up with
+        """
+        self.betting_agent.collect_winnings(
+            self.playing_agent.amount_won(dealer_hand)
+        )
+
+    def __repr__(self):
+        return (
+            f"Cash: {self.betting_agent.cash}, " +
+            f"Current Hand: {self.playing_agent}"
+        )

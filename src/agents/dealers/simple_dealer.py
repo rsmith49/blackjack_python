@@ -1,7 +1,7 @@
-from .player import BasePlayerHand, PlayerAction
+from src.simulator.player import PlayerHandAgent, PlayerAction
 
 
-class SimpleDealer(BasePlayerHand):
+class SimpleDealer(PlayerHandAgent):
     """
     A simple dealer that hits soft 17's. It does not split or double down.
     """
@@ -24,7 +24,7 @@ class SimpleDealer(BasePlayerHand):
         else:
             return PlayerAction.STAY
 
-    def update_state(self, game):
+    def update_model(self, game):
         """
         This simple dealer doesn't care about the game state to perform actions
         """

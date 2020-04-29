@@ -5,12 +5,6 @@ CARD_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10] * 4
 CARDS_IN_DECK = 52
 
 
-class EndOfChuteException(Exception):
-    """
-    Signals the Chute has ended and we need to reshuffle the decks
-    """
-
-
 class Deck:
     """
     Simulates a dealer's deck(s)
@@ -32,6 +26,7 @@ class Deck:
         # Put these here so PyCharm would stop yelling at me
         self.cards = None
         self.card_index = 0
+        self.chute_over = False
 
         self.shuffle()
 
@@ -44,6 +39,7 @@ class Deck:
         self.cards = CARD_VALUES * self.num_decks
 
         np.random.shuffle(self.cards)
+        self.chute_over = False
 
     def next_card(self):
         """
@@ -55,7 +51,7 @@ class Deck:
         self.card_index += 1
 
         if self.card_index >= self.reshuffle_at:
-            raise EndOfChuteException()
+            self.chute_over = True
 
         return card
 
