@@ -80,16 +80,22 @@ class BaseGame:
             print(f"Dealer showing {self.dealer.hands[0].cards[0]}")
             print("Results:")
 
+        all_players_busted = True
+
         for player in self.players:
             # Attempting minor speed boost by only updating the necessary
             # agent at each place
             player.playing_agent.update_model(self)
             player.play_hand(self.deck)
 
+            if not player.all_busts():
+                all_players_busted = False
+
             if self.debug:
                 print(f"  {player}")
 
-        self.dealer.play_hand(self.deck)
+        if not all_players_busted:
+            self.dealer.play_hand(self.deck)
 
         if self.debug:
             print(f"  (Dealer) {self.dealer}")
@@ -131,3 +137,12 @@ class BaseGame:
             self.deal_initial_hands()
             self.play_hand()
             self.collect_bets()
+            self.record_stats()
+
+    def record_stats(self):
+        """
+        Can be implemented by child methods to record the stats at the end of
+        each hand
+        :return:
+        """
+        pass

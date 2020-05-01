@@ -60,6 +60,13 @@ class Hand:
         """
         return sum(self.cards) != self.value()
 
+    def busted(self):
+        """
+        Whether the hand busted (went over 21)
+        :return: bool
+        """
+        return self.value() > BUST_SCORE
+
     def amount_won(self, dealer_hand):
         """
         Returns the multiplier of the original bet that the player
@@ -70,7 +77,7 @@ class Hand:
         # Idk, maybe every speed up counts
         value = self.value()
 
-        if value > BUST_SCORE:
+        if value > BUST_SCORE:  # So we don't have to calculate value again
             amount = -1
 
         elif self.blackjack:
@@ -367,6 +374,17 @@ class Player:
         self.betting_agent.collect_winnings(
             self.playing_agent.amount_won(dealer_hand)
         )
+
+    def all_busts(self):
+        """
+        Returns a boolean of whether all of the player's hands busted
+        :return:
+        """
+        for hand in self.playing_agent.hands:
+            if not hand.busted():
+                return False
+
+        return True
 
     def __repr__(self):
         return (
