@@ -85,8 +85,8 @@ class BaseGame:
         for player in self.players:
             # Attempting minor speed boost by only updating the necessary
             # agent at each place
-            player.playing_agent.update_model(self)
-            player.play_hand(self.deck)
+            #player.playing_agent.update_model(self)
+            player.play_hand(self.deck, self)
 
             if not player.all_busts():
                 all_players_busted = False
@@ -95,7 +95,7 @@ class BaseGame:
                 print(f"  {player}")
 
         if not all_players_busted:
-            self.dealer.play_hand(self.deck)
+            self.dealer.play_hand(self.deck, self)
 
         if self.debug:
             print(f"  (Dealer) {self.dealer}")

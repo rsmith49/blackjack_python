@@ -162,13 +162,14 @@ class PlayerHandAgent:
             hand = self.hands[self.curr_hand_ndx]
             hand.add_card(card)
 
-    def play_hand(self, deck):
+    def play_hand(self, deck, game):
         """
         Performs actions for the hand based on the policy decided by
         self.get_action until the player busts or stays for each hand
         :return:
         """
         while self.curr_hand_ndx < len(self.hands):
+            self.update_model(game)
             self._perform_action(self.get_action(), deck)
 
     def amount_won(self, dealer_hand):
@@ -351,12 +352,12 @@ class Player:
         """
         self.playing_agent.reset_hand()
 
-    def play_hand(self, deck):
+    def play_hand(self, deck, game):
         """
         Wrapper to play the hand(s) in the current round
         :param deck:
         """
-        self.playing_agent.play_hand(deck)
+        self.playing_agent.play_hand(deck, game)
 
     def deal_card(self, card):
         """
