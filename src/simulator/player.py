@@ -60,6 +60,13 @@ class Hand:
         """
         return sum(self.cards) != self.value()
 
+    def busted(self):
+        """
+        Whether the hand busted (went over 21)
+        :return: bool
+        """
+        return self.value() > BUST_SCORE
+
     def amount_won(self, dealer_hand):
         """
         Returns the multiplier of the original bet that the player
@@ -70,7 +77,7 @@ class Hand:
         # Idk, maybe every speed up counts
         value = self.value()
 
-        if value > BUST_SCORE:
+        if value > BUST_SCORE:  # So we don't have to calculate value again
             amount = -1
 
         elif self.blackjack:
@@ -155,13 +162,14 @@ class PlayerHandAgent:
             hand = self.hands[self.curr_hand_ndx]
             hand.add_card(card)
 
-    def play_hand(self, deck):
+    def play_hand(self, deck, game):
         """
         Performs actions for the hand based on the policy decided by
         self.get_action until the player busts or stays for each hand
         :return:
         """
         while self.curr_hand_ndx < len(self.hands):
+            self.update_model(game)
             self._perform_action(self.get_action(), deck)
 
     def amount_won(self, dealer_hand):
@@ -344,12 +352,12 @@ class Player:
         """
         self.playing_agent.reset_hand()
 
-    def play_hand(self, deck):
+    def play_hand(self, deck, game):
         """
         Wrapper to play the hand(s) in the current round
         :param deck:
         """
-        self.playing_agent.play_hand(deck)
+        self.playing_agent.play_hand(deck, game)
 
     def deal_card(self, card):
         """
@@ -367,6 +375,17 @@ class Player:
         self.betting_agent.collect_winnings(
             self.playing_agent.amount_won(dealer_hand)
         )
+
+    def all_busts(self):
+        """
+        Returns a boolean of whether all of the player's hands busted
+        :return:
+        """
+        for hand in self.playing_agent.hands:
+            if not hand.busted():
+                return False
+
+        return True
 
     def __repr__(self):
         return (
