@@ -50,3 +50,6 @@ traitlets==4.3.3
 wcwidth==0.1.9
 webencodings==0.5.1
 zipp==3.1.0
+
+Tensorforce~=0.5.4
+enum34~=1.1.10

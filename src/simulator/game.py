@@ -52,15 +52,18 @@ class BaseGame:
             player.betting_agent.update_model(self)
             player.place_bet()
 
-            if self.debug:
-                print(f"Player {player} bets {player.betting_agent.curr_bet}")
-
     def deal_initial_hands(self):
         """
         This function deals the initial hand for the round to all players
         """
         self._deal_cards()
         self._deal_cards()
+
+        if self.debug:
+            for player in self.players:
+                print(f"Player {player} bets {player.betting_agent.curr_bet}")
+
+            print(f"Dealer showing {self.dealer.hands[0].cards[0]} with hand {self.dealer}")
 
     def _deal_cards(self):
         """
@@ -114,6 +117,8 @@ class BaseGame:
                 player.collect_winnings(self.dealer)
 
                 if self.debug:
+                    print(f"Final: Player {player}")
+                    print(f"Final: Dealer {self.dealer}")
                     print(f"  Player {player_ndx} wins {player.betting_agent.cash - curr_cash}")
 
             except BankruptException:

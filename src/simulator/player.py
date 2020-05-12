@@ -259,6 +259,18 @@ class PlayerHandAgent:
         return output
 
 
+class PassPlayerHandAgent(PlayerHandAgent):
+    """
+    Do nothing because we're not using this to train or play the game. Instead we play using
+    the environment step function
+    """
+    def update_model(self, game):
+        pass
+
+    def get_action(self):
+        pass
+
+
 # TODO: Maybe make the betting agent able to control amount to double/split
 class PlayerBettingAgent:
     """
