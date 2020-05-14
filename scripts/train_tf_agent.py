@@ -8,10 +8,15 @@ from src.simulator.player import Player, PassPlayerHandAgent
 
 def main():
     agent_type = 'dqn'
-    agent_dir = 'data/dqn'
+    agent_dir = f'data/{agent_type}'
     model_format = 'tensorflow'
-    tensorboard_dir = 'data/summaries'
+    tensorboard_dir = f'data/summaries/{agent_type}'
     tensorboard_labels = ['graph', 'entropy', 'kl-divergence', 'losses', 'rewards']
+    tensorboard_freq = 50
+    start_updating = 5000
+    memory = 10000
+    batch_size = 10
+    num_episodes = 100000
 
     environment = TFBlackjackEnvironment(
         Deck(),
@@ -25,32 +30,32 @@ def main():
             directory=agent_dir,
             format=model_format,
             environment=environment,
-            start_updating=5000,
-            memory=10000,
+            start_updating=start_updating,
+            memory=memory,
             summarizer=dict(
                 directory=tensorboard_dir,
                 labels=tensorboard_labels,
-                frequency=50,
+                frequency=tensorboard_freq,
             )
         )
         print("Loading existing agent for training")
     except ValueError:
         agent = Agent.create(
             agent=agent_type,
-            environment=environment,  # alternatively: states, actions, (max_episode_timesteps)
-            batch_size=10,
-            start_updating=5000,
-            memory=10000,
+            environment=environment,
+            batch_size=batch_size,
+            start_updating=start_updating,
+            memory=memory,
             summarizer=dict(
                 directory=tensorboard_dir,
                 labels=tensorboard_labels,
-                frequency=50,
+                frequency=tensorboard_freq,
             )
         )
         print("Creating new agent")
 
-    for ndx in range(100000):
-        # Initialize episode
+    # Train the agent on the number of episodes specified
+    for _ in range(num_episodes):
         states = environment.reset()
         terminal = False
 
@@ -60,7 +65,7 @@ def main():
             states, terminal, reward = environment.execute(actions=actions)
             agent.observe(terminal=terminal, reward=reward)
 
-    # save agent after running 300 episodes
+    # save agent after done training. Attaches num episodes trained on to agent name
     agent.save(directory=agent_dir, append='episodes')
 
     agent.close()
