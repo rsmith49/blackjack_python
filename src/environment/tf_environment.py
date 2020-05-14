@@ -1,6 +1,7 @@
 from tensorforce import Environment
 from ..simulator.game import BaseGame
 from ..simulator.player import PlayerAction
+from ..simulator.utils import BlackjackException
 
 
 class TFBlackjackEnvironment(BaseGame, Environment):
@@ -8,14 +9,24 @@ class TFBlackjackEnvironment(BaseGame, Environment):
     Class that acts as a tensorforce environment
     """
 
-    def __init__(self, deck, dealer, *players):
-        super(TFBlackjackEnvironment, self).__init__(deck, dealer, *players, debug=True)
+    def __init__(self, deck, dealer, *players, debug=False):
+        super(TFBlackjackEnvironment, self).__init__(deck, dealer, *players, debug=debug)
 
         self._max_episode_timesteps = 500
+        self.sum_multiplier = 0
+        self.num_rounds = 0
+
+    def get_stats(self):
+        for player in self.players:
+            self.sum_multiplier += player.playing_agent.amount_won(self.dealer)
+            self.num_rounds += 1
+
+    def print_stats(self):
+        print(f"Stats: {self.sum_multiplier/self.num_rounds}")
 
     def states(self):
         return dict(
-            features=dict(type='int', shape=(5,), num_values=1440)
+            features=dict(type='int', shape=(5,), num_values=23)
         )
 
     def actions(self):
@@ -28,8 +39,8 @@ class TFBlackjackEnvironment(BaseGame, Environment):
         Resets the game and returns the first observation
         :return: First observation given by self._observe()
         """
-        if self.deck.chute_over:
-            self.deck.shuffle()
+        self.deck.shuffle()
+        # if self.deck.chute_over:
 
         self.reset_hands()
         self.place_bets()
@@ -46,9 +57,7 @@ class TFBlackjackEnvironment(BaseGame, Environment):
         try:
             player_hand = player_agent.hands[player_agent.curr_hand_ndx]
         except IndexError:
-            # If we are past the last hand, then we are done anyways so
-            # the observation doesn't matter
-            return dict()
+            player_hand = player_agent.hands[player_agent.curr_hand_ndx - 1]
 
         state = dict(
             features=[
@@ -68,7 +77,6 @@ class TFBlackjackEnvironment(BaseGame, Environment):
         """
         Executes a step of the environment given an action
         """
-        print("ACTION TAKEN: " + str(actions))
         # TODO: Obviously this is terrible access practice
         player_hand = self.players[0].playing_agent
         try:
@@ -79,8 +87,10 @@ class TFBlackjackEnvironment(BaseGame, Environment):
         except ValueError:
             # Probably split or doubled when we couldn't
             return self._observe(), True, -10
+        except BlackjackException:
+            # if we get a blackjack on first deal calculate reward
+            pass
 
-        obs = self._observe()
         done = player_hand.curr_hand_ndx >= len(player_hand.hands)
 
         if done:
@@ -89,6 +99,8 @@ class TFBlackjackEnvironment(BaseGame, Environment):
             reward = player_hand.amount_won(self.dealer)
         else:
             reward = 0
+
+        obs = self._observe()
 
         return obs, done, reward
 

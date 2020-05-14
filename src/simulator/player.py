@@ -5,7 +5,7 @@ player classes in order to create agents that rely on policy
 from enum import Enum
 
 from .consts import *
-from .utils import BustException, BankruptException
+from .utils import BustException, BankruptException, BlackjackException
 
 
 class Hand:
@@ -196,14 +196,17 @@ class PlayerHandAgent:
         :param deck: The deck object to pull cards from
         :return:
         """
-        if action == PlayerAction.STAY:
-            self._stay()
-        elif action == PlayerAction.HIT:
-            self._hit(deck)
-        elif action == PlayerAction.SPLIT:
-            self._split(deck)
-        elif action == PlayerAction.DOUBLE:
-            self._double(deck)
+        if self.curr_hand_ndx < len(self.hands):
+            if action == PlayerAction.STAY:
+                self._stay()
+            elif action == PlayerAction.HIT:
+                self._hit(deck)
+            elif action == PlayerAction.SPLIT:
+                self._split(deck)
+            elif action == PlayerAction.DOUBLE:
+                self._double(deck)
+        else:
+            raise BlackjackException("You can't perform another since you have a blackjack")
 
     def _stay(self):
         self.curr_hand_ndx += 1
