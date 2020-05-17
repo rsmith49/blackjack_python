@@ -62,7 +62,7 @@ class TFBlackjackEnvironment(BaseGame, Environment):
         state = dict(
             features=[
                 player_hand.value(),
-                self.dealer.hands[0].value(),
+                self.dealer.hands[0].cards[1],
                 player_hand.is_soft(),
                 len(player_hand.cards) == 2,
                 len(player_hand.cards) == 2 and (
@@ -72,6 +72,17 @@ class TFBlackjackEnvironment(BaseGame, Environment):
         )
 
         return state
+
+    def _get_reward(self, multiplier):
+        """
+        Normalizes the reward to -1 or 1 for wins and losses
+        """
+        if multiplier > 0:
+            return 1
+        elif multiplier < 0:
+            return -1
+
+        return multiplier
 
     def execute(self, actions):
         """
@@ -86,7 +97,7 @@ class TFBlackjackEnvironment(BaseGame, Environment):
             )
         except ValueError:
             # Probably split or doubled when we couldn't
-            return self._observe(), True, -10
+            return self._observe(), True, -1
         except BlackjackException:
             # if we get a blackjack on first deal calculate reward
             pass

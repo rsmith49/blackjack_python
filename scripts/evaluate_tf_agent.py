@@ -12,13 +12,14 @@ def main():
     model_format = 'tensorflow'
     start_updating = 5000
     memory = 10000
-    num_episodes = 500000
+    num_episodes = 1000
+    debug = True
 
     environment = TFBlackjackEnvironment(
         Deck(),
         SimpleDealer(),
         Player(PassPlayerHandAgent(), ConstantBettingAgent()),
-        debug=False
+        debug=debug
     )
 
     agent = Agent.load(
@@ -30,12 +31,19 @@ def main():
     )
 
     for _ in range(num_episodes):
+        if debug:
+            print()
+
         states = environment.reset()
         terminal = False
 
         while not terminal:
             actions = agent.act(states=states, evaluation=True)
-            _, terminal, _ = environment.execute(actions=actions)
+
+            if debug:
+                print(f"ACTION TAKEN: {actions}")
+
+            states, terminal, _ = environment.execute(actions=actions)
             environment.get_stats()
 
     environment.print_stats()

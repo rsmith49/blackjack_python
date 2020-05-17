@@ -12,56 +12,64 @@ def main():
     model_format = 'tensorflow'
     tensorboard_dir = f'data/summaries/{agent_type}'
     tensorboard_labels = ['graph', 'entropy', 'kl-divergence', 'losses', 'rewards']
-    tensorboard_freq = 50
-    start_updating = 5000
+    tensorboard_freq = 20
     memory = 10000
-    batch_size = 10
-    num_episodes = 100000
+    batch_size = 20
+    num_episodes = 10000000
+    learning_rate = 3e-7
+    exploration = 0.2
+    summarizer = dict(
+        directory=tensorboard_dir,
+        labels=tensorboard_labels,
+        frequency=tensorboard_freq,
+    )
+    should_load = False
+    debug = False
 
     environment = TFBlackjackEnvironment(
         Deck(),
         SimpleDealer(),
-        Player(PassPlayerHandAgent(), ConstantBettingAgent())
+        Player(PassPlayerHandAgent(), ConstantBettingAgent()),
+        debug=debug
     )
 
-    # try to load agent that exists already, otherwise create a new agent instance
-    try:
+    if should_load:
         agent = Agent.load(
             directory=agent_dir,
             format=model_format,
             environment=environment,
-            start_updating=start_updating,
             memory=memory,
-            summarizer=dict(
-                directory=tensorboard_dir,
-                labels=tensorboard_labels,
-                frequency=tensorboard_freq,
-            )
+            learning_rate=learning_rate,
+            exploration=exploration,
+            summarizer=summarizer
         )
         print("Loading existing agent for training")
-    except ValueError:
+    else:
         agent = Agent.create(
             agent=agent_type,
             environment=environment,
             batch_size=batch_size,
-            start_updating=start_updating,
             memory=memory,
-            summarizer=dict(
-                directory=tensorboard_dir,
-                labels=tensorboard_labels,
-                frequency=tensorboard_freq,
-            )
+            exploration=exploration,
+            summarizer=summarizer
         )
         print("Creating new agent")
 
     # Train the agent on the number of episodes specified
     for _ in range(num_episodes):
+        if debug:
+            print()
+
         states = environment.reset()
         terminal = False
 
         while not terminal:
             # Episode timestep
             actions = agent.act(states=states)
+
+            if debug:
+                print(f"ACTION TAKEN: {actions}")
+
             states, terminal, reward = environment.execute(actions=actions)
             agent.observe(terminal=terminal, reward=reward)
 
