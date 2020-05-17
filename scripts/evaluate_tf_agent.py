@@ -39,6 +39,7 @@ def main():
 
         while not terminal:
             actions = agent.act(states=states, evaluation=True)
+
             if debug:
                 print(f"ACTION TAKEN: {actions}")
 
