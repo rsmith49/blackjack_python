@@ -184,7 +184,7 @@ class BookPlayerAgent(PlayerHandAgent):
         self.dealer_card = 0
 
     def update_model(self, game):
-        self.dealer_card = game.dealer.hands[0].cards[1]
+        self.dealer_card = game.dealer.hands[0].cards[0]
 
     def get_action(self):
         """
