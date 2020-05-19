@@ -15,12 +15,12 @@ class BookPlayerAgent(PlayerHandAgent):
     "by-the-book" action matrix for hands that are soft and can double
         1  2  3  4  5  6  7  8  9  10
     12  P  P  P  P  P  P  P  P  P  P
-    13  H  D  D  H  H  H  H  H  H  H
-    14  H  D  D  D  H  H  H  H  H  H
-    15  H  D  D  D  H  H  H  H  H  H
-    16  H  D  D  D  H  H  H  H  H  H
-    17  S  S  S  S  S  S  S  S  S  S
-    18  S  S  S  S  S  S  S  S  S  S
+    13  H  H  H  H  D  D  H  H  H  H
+    14  H  H  H  H  D  D  H  H  H  H
+    15  H  H  H  D  D  D  H  H  H  H
+    16  H  H  H  D  D  D  H  H  H  H
+    17  H  S  D  D  D  D  H  H  H  H
+    18  H  S  D  D  D  D  S  S  H  H
     19  S  S  S  S  S  S  S  S  S  S
     20  S  S  S  S  S  S  S  S  S  S
     21  S  S  S  S  S  S  S  S  S  S
@@ -28,12 +28,12 @@ class BookPlayerAgent(PlayerHandAgent):
     soft_actions_ndx_offset = 12
     soft_actions_double = [
         [split, split, split, split, split, split, split, split, split, split],
-        [hit, double, double, hit, hit, hit, hit, hit, hit, hit],
-        [hit, double, double, double, hit, hit, hit, hit, hit, hit],
-        [hit, double, double, double, hit, hit, hit, hit, hit, hit],
-        [hit, double, double, double, hit, hit, hit, hit, hit, hit],
-        [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay],
-        [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay],
+        [hit, hit, hit, hit, double, double, hit, hit, hit, hit],
+        [hit, hit, hit, hit, double, double, hit, hit, hit, hit],
+        [hit, hit, hit, double, double, double, hit, hit, hit, hit],
+        [hit, hit, hit, double, double, double, hit, hit, hit, hit],
+        [hit, stay, double, double, double, double, hit, hit, hit, hit],
+        [hit, stay, double, double, double, double, stay, stay, hit, hit],
         [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay],
         [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay],
         [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay]
@@ -43,10 +43,10 @@ class BookPlayerAgent(PlayerHandAgent):
     by the book action matrix for hands that are soft and can't double
         1  2  3  4  5  6  7  8  9  10
     12  P  P  P  P  P  P  P  P  P  P
-    13  H  H  H  H  H  H  H  H  H  H
-    14  H  H  H  H  H  H  H  H  H  H
-    15  H  H  H  H  H  H  H  H  H  H
-    16  H  H  H  H  H  H  H  H  H  H
+    13  H  S  S  S  S  S  H  H  H  H
+    14  H  S  S  S  S  S  H  H  H  H
+    15  H  S  S  S  S  S  H  H  H  H
+    16  H  S  S  S  S  S  H  H  H  H
     17  S  S  S  S  S  S  S  S  S  S
     18  S  S  S  S  S  S  S  S  S  S
     19  S  S  S  S  S  S  S  S  S  S
@@ -55,10 +55,10 @@ class BookPlayerAgent(PlayerHandAgent):
     """
     soft_actions = [
         [split, split, split, split, split, split, split, split, split, split],
-        [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
-        [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
-        [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
-        [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
+        [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
+        [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
+        [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
+        [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
         [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay],
         [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay],
         [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay],
@@ -74,10 +74,10 @@ class BookPlayerAgent(PlayerHandAgent):
     6   H  H  H  H  H  H  H  H  H  H
     7   H  H  H  H  H  H  H  H  H  H
     8   H  H  H  H  H  H  H  H  H  H
-    9   H  D  D  H  H  H  H  H  H  H
-    10  H  D  D  D  D  H  H  H  H  H
-    11  D  D  D  D  D  D  D  D  D  D
-    12  H  S  S  S  S  S  H  H  H  H
+    9   H  H  D  D  D  D  H  H  H  H
+    10  H  D  D  D  D  D  D  D  D  H
+    11  H  D  D  D  D  D  D  D  D  D
+    12  H  H  H  S  S  S  H  H  H  H
     13  H  S  S  S  S  S  H  H  H  H
     14  H  S  S  S  S  S  H  H  H  H
     15  H  S  S  S  S  S  H  H  H  H
@@ -95,10 +95,10 @@ class BookPlayerAgent(PlayerHandAgent):
         [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
         [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
         [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
-        [hit, double, double, hit, hit, hit, hit, hit, hit, hit],
-        [hit, double, double, double, double, hit, hit, hit, hit, hit],
-        [double, double, double, double, double, double, double, double, double, double],
-        [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
+        [hit, hit, double, double, double, double, hit, hit, hit, hit],
+        [hit, double, double, double, double, double, double, double, double, hit],
+        [hit, double, double, double, double, double, double, double, double, double],
+        [hit, hit, hit, stay, stay, stay, hit, hit, hit, hit],
         [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
         [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
         [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
@@ -119,7 +119,7 @@ class BookPlayerAgent(PlayerHandAgent):
     9   H  H  H  H  H  H  H  H  H  H
     10  H  H  H  H  H  H  H  H  H  H
     11  H  H  H  H  H  H  H  H  H  H
-    12  H  S  S  S  S  S  H  H  H  H
+    12  H  H  H  S  S  S  H  H  H  H
     13  H  S  S  S  S  S  H  H  H  H
     14  H  S  S  S  S  S  H  H  H  H
     15  H  S  S  S  S  S  H  H  H  H
@@ -138,7 +138,7 @@ class BookPlayerAgent(PlayerHandAgent):
         [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
         [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
         [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
-        [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
+        [hit, hit, hit, stay, stay, stay, hit, hit, hit, hit],
         [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
         [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
         [hit, stay, stay, stay, stay, stay, hit, hit, hit, hit],
@@ -154,27 +154,27 @@ class BookPlayerAgent(PlayerHandAgent):
     """
     by the book action matrix for hands that aren't soft but we can split
         1  2  3  4  5  6  7  8  9  10  
-    4   H  H  H  H  H  H  H  H  H  H
-    6   H  H  H  H  H  H  H  H  H  H
-    8   H  H  H  H  H  H  H  H  H  H
-    10  H  D  D  D  D  H  H  H  H  H
-    12  H  H  H  H  H  H  H  H  H  H
-    14  P  P  P  P  P  P  P  P  P  P
+    4   H  P  P  P  P  P  P  H  H  H
+    6   H  P  P  P  P  P  P  H  H  H
+    8   H  H  H  H  P  P  H  H  H  H
+    10  H  D  D  D  D  D  D  D  D  H
+    12  H  P  P  P  P  P  H  H  H  H
+    14  H  P  P  P  P  P  P  H  H  H
     16  P  P  P  P  P  P  P  P  P  P
-    18  P  P  P  P  P  P  P  P  P  P
+    18  S  P  P  P  P  P  S  P  P  S
     20  S  S  S  S  S  S  S  S  S  S
     """
     split_action_ndx_offset = 4
     split_action_ndx_multiplier = 2
     split_actions = [
-        [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
-        [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
-        [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
-        [hit, double, double, double, double, hit, hit, hit, hit, hit],
-        [hit, hit, hit, hit, hit, hit, hit, hit, hit, hit],
+        [hit, split, split, split, split, split, split, hit, hit, hit],
+        [hit, split, split, split, split, split, split, hit, hit, hit],
+        [hit, hit, hit, hit, split, split, hit, hit, hit, hit],
+        [hit, double, double, double, double, double, double, double, double, hit],
+        [hit, split, split, split, split, split, hit, hit, hit, hit],
+        [hit, split, split, split, split, split, split, hit, hit, hit],
         [split, split, split, split, split, split, split, split, split, split],
-        [split, split, split, split, split, split, split, split, split, split],
-        [split, split, split, split, split, split, split, split, split, split],
+        [stay, split, split, split, split, split, stay, split, split, stay],
         [stay, stay, stay, stay, stay, stay, stay, stay, stay, stay]
     ]
 
