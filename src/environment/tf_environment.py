@@ -39,8 +39,8 @@ class TFBlackjackEnvironment(BaseGame, Environment):
         Resets the game and returns the first observation
         :return: First observation given by self._observe()
         """
-        self.deck.shuffle()
-        # if self.deck.chute_over:
+        if self.deck.chute_over:
+            self.deck.shuffle()
 
         self.reset_hands()
         self.place_bets()
@@ -62,7 +62,7 @@ class TFBlackjackEnvironment(BaseGame, Environment):
         state = dict(
             features=[
                 player_hand.value(),
-                self.dealer.hands[0].cards[1],
+                self.dealer.hands[0].cards[0],
                 player_hand.is_soft(),
                 len(player_hand.cards) == 2,
                 len(player_hand.cards) == 2 and (
@@ -96,8 +96,9 @@ class TFBlackjackEnvironment(BaseGame, Environment):
                 self.deck
             )
         except ValueError:
-            # Probably split or doubled when we couldn't
-            return self._observe(), True, -1
+            # invalid action. Don't end the episode
+            # just give negative reward when doing an invalid action
+            return self._observe(), False, -1
         except BlackjackException:
             # if we get a blackjack on first deal calculate reward
             pass

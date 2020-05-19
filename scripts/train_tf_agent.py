@@ -13,17 +13,17 @@ def main():
     tensorboard_dir = f'data/summaries/{agent_type}'
     tensorboard_labels = ['graph', 'entropy', 'kl-divergence', 'losses', 'rewards']
     tensorboard_freq = 20
-    memory = 10000
     batch_size = 20
-    num_episodes = 10000000
-    learning_rate = 3e-7
-    exploration = 0.2
+    memory = 10000
+    num_episodes = 50000
+    learning_rate = 3e-4
+    exploration = 0.0
     summarizer = dict(
         directory=tensorboard_dir,
         labels=tensorboard_labels,
         frequency=tensorboard_freq,
     )
-    should_load = False
+    should_load = True
     debug = False
 
     environment = TFBlackjackEnvironment(
@@ -37,11 +37,12 @@ def main():
         agent = Agent.load(
             directory=agent_dir,
             format=model_format,
+            batch_size=batch_size,
             environment=environment,
+            exploration=exploration,
+            summarizer=summarizer,
             memory=memory,
             learning_rate=learning_rate,
-            exploration=exploration,
-            summarizer=summarizer
         )
         print("Loading existing agent for training")
     else:
@@ -49,9 +50,10 @@ def main():
             agent=agent_type,
             environment=environment,
             batch_size=batch_size,
-            memory=memory,
             exploration=exploration,
-            summarizer=summarizer
+            summarizer=summarizer,
+            memory=memory,
+            learning_rate=learning_rate,
         )
         print("Creating new agent")
 

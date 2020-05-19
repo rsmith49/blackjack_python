@@ -10,8 +10,6 @@ def main():
     agent_type = 'dqn'
     agent_dir = f'data/{agent_type}'
     model_format = 'tensorflow'
-    start_updating = 5000
-    memory = 10000
     num_episodes = 1000
     debug = True
 
@@ -26,8 +24,6 @@ def main():
         directory=agent_dir,
         format=model_format,
         environment=environment,
-        start_updating=start_updating,
-        memory=memory,
     )
 
     for _ in range(num_episodes):
