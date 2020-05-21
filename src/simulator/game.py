@@ -1,5 +1,6 @@
 from typing import List
 
+from .consts import *
 from .utils import BankruptException
 from .player import Player, PlayerHandAgent
 from .deck import Deck
@@ -64,6 +65,12 @@ class BaseGame:
                 print(f"Player {player} bets {player.betting_agent.curr_bet}")
 
             print(f"Dealer showing {self.dealer.hands[0].cards[0]} with hand {self.dealer}")
+
+        # after dealing initial hands check if any players got blackjack dealt to them
+        for player in self.players:
+            if player.playing_agent.hands[0].value() == BLACKJACK:
+                player.playing_agent.hands[0].blackjack = True
+                player.playing_agent.curr_hand_ndx += 1
 
     def _deal_cards(self):
         """
