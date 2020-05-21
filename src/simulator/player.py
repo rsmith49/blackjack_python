@@ -60,6 +60,18 @@ class Hand:
         """
         return sum(self.cards) != self.value()
 
+    def can_split(self):
+        """
+        Returns whether or not a hand can be split
+        """
+        return len(self.cards) == 2 and self.cards[0] == self.cards[1]
+
+    def can_double(self):
+        """
+        Returns whether or not a hand can be doubled
+        """
+        return len(self.cards) == 2
+
     def busted(self):
         """
         Whether the hand busted (went over 21)
