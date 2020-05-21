@@ -205,8 +205,10 @@ class PlayerHandAgent:
                 self._split(deck)
             elif action == PlayerAction.DOUBLE:
                 self._double(deck)
-        else:
+        elif self.hands[self.curr_hand_ndx - 1].blackjack:
             raise BlackjackException("You can't perform another since you have a blackjack")
+        else:
+            raise ValueError("Somehow went passed index without getting blackjack")
 
     def _stay(self):
         self.curr_hand_ndx += 1
