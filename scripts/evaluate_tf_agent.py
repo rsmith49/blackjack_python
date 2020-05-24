@@ -2,19 +2,20 @@ from tensorforce import Agent
 from src.agents.dealers.simple_dealer import SimpleDealer
 from src.agents.betting.simple_betting_agent import ConstantBettingAgent
 from src.environment.tf_environment import TFBlackjackEnvironment
-from src.simulator.deck import Deck
+from src.simulator.deck import CountDeck
 from src.simulator.player import Player, PassPlayerHandAgent
 
 
 def main():
     agent_type = 'dqn'
     agent_dir = f'data/{agent_type}'
+    agent_name = 'counting'
     model_format = 'tensorflow'
-    num_episodes = 1000
-    debug = True
+    num_episodes = 1000000
+    debug = False
 
     environment = TFBlackjackEnvironment(
-        Deck(),
+        CountDeck(),
         SimpleDealer(),
         Player(PassPlayerHandAgent(), ConstantBettingAgent()),
         debug=debug
@@ -22,6 +23,7 @@ def main():
 
     agent = Agent.load(
         directory=agent_dir,
+        name=agent_name,
         format=model_format,
         environment=environment,
     )

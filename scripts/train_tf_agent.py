@@ -2,13 +2,14 @@ from tensorforce import Agent
 from src.agents.dealers.simple_dealer import SimpleDealer
 from src.agents.betting.simple_betting_agent import ConstantBettingAgent
 from src.environment.tf_environment import TFBlackjackEnvironment
-from src.simulator.deck import Deck
+from src.simulator.deck import CountDeck
 from src.simulator.player import Player, PassPlayerHandAgent
 
 
 def main():
     agent_type = 'dqn'
     agent_dir = f'data/{agent_type}'
+    agent_name = 'counting'
     model_format = 'tensorflow'
     tensorboard_dir = f'data/summaries/{agent_type}'
     tensorboard_labels = ['graph', 'entropy', 'kl-divergence', 'losses', 'rewards']
@@ -27,7 +28,7 @@ def main():
     debug = False
 
     environment = TFBlackjackEnvironment(
-        Deck(),
+        CountDeck(),
         SimpleDealer(),
         Player(PassPlayerHandAgent(), ConstantBettingAgent()),
         debug=debug
@@ -35,6 +36,7 @@ def main():
 
     if should_load:
         agent = Agent.load(
+            name=agent_name,
             directory=agent_dir,
             format=model_format,
             batch_size=batch_size,
@@ -47,6 +49,7 @@ def main():
         print("Loading existing agent for training")
     else:
         agent = Agent.create(
+            name=agent_name,
             agent=agent_type,
             environment=environment,
             batch_size=batch_size,
