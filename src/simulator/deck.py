@@ -76,3 +76,34 @@ class Deck:
         :return: list of card values
         """
         return self.cards[self.card_index + 1:]
+
+
+class CountDeck(Deck):
+    """
+    Class to retrieve data for counting the cards
+    """
+    def __init__(self, *args, **kwargs):
+        self.card_counts = None
+        self.num_cards = None
+        super(CountDeck, self).__init__(*args, **kwargs)
+
+    def shuffle(self):
+        super(CountDeck, self).shuffle()
+        # Keeping track of (relative) count for each card
+        # (this count is normalized by self.num_decks)
+        self.card_counts = [
+            (4 if card_ndx < 10 else 4 * 4) * self.num_decks
+            for card_ndx in range(1, 11)
+        ]
+        self.num_cards = len(self.cards) - 1
+
+    def next_card(self):
+        card = super(CountDeck, self).next_card()
+        self.card_counts[card - 1] -= 1
+        if self.card_counts[card - 1] < 0:
+            raise ValueError('Card Counts are negative')
+        self.num_cards -= 1
+        return card
+
+    def card_probs(self):
+        return [1.0 * card_count / self.num_cards for card_count in self.card_counts]

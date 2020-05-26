@@ -26,7 +26,8 @@ class TFBlackjackEnvironment(BaseGame, Environment):
 
     def states(self):
         return dict(
-            features=dict(type='int', shape=(5,), num_values=23)
+            int_features=dict(type='int', shape=(5,), num_values=23),
+            float_features=dict(type='float', shape=(10,), min_value=0.0, max_value=1.0)
         )
 
     def actions(self):
@@ -60,7 +61,7 @@ class TFBlackjackEnvironment(BaseGame, Environment):
             player_hand = player_agent.hands[player_agent.curr_hand_ndx - 1]
 
         state = dict(
-            features=[
+            int_features=[
                 player_hand.value(),
                 self.dealer.hands[0].cards[0],
                 player_hand.is_soft(),
@@ -68,7 +69,8 @@ class TFBlackjackEnvironment(BaseGame, Environment):
                 len(player_hand.cards) == 2 and (
                         player_hand.cards[0] == player_hand.cards[1]
                 )
-            ]
+            ],
+            float_features=self.deck.card_probs()
         )
 
         return state
